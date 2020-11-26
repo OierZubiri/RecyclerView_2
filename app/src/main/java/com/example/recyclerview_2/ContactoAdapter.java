@@ -1,5 +1,6 @@
 package com.example.recyclerview_2;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,33 +12,51 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class ContactoAdapter extends RecyclerView.Adapter<ContactoAdapter.MyViewHolder> {
+public class ContactoAdapter extends RecyclerView.Adapter<ContactoAdapter.MiViewHolder> {
 
 	private List<Contacto> contactsList;
 	private DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	private final OnItemClickListener listener;
 	/**
-	 * View holder class
+	 * Clase ViewHolder
 	 * */
-	public class MyViewHolder extends RecyclerView.ViewHolder {
+
+	// Interfaz que implementaremos para poder recibir los eventos click sobre los items.
+	public interface OnItemClickListener {
+		void onItemClick(Contacto item);
+	}
+
+	// Nuestro ViewHolder con los datos que queremos mostrar.
+	public class MiViewHolder extends RecyclerView.ViewHolder {
 		public TextView nombreTV;
 		public TextView fechaNacimientoTV;
 
-		public MyViewHolder(View view) {
+		// Obtenemos los elementos del layout que vamos a modificar y mostrar.
+		public MiViewHolder(View view) {
 			super(view);
 			nombreTV 			= (TextView) view.findViewById(R.id.contactName);
 			fechaNacimientoTV 	= (TextView) view.findViewById(R.id.birthday);
 		}
 	}
 
-	public ContactoAdapter(List<Contacto> contactLists) {
-		this.contactsList = contactLists;
+	// Constructor del Adaptador.
+	public ContactoAdapter(List<Contacto> contactLists, OnItemClickListener listener) {
+		this.contactsList 	= contactLists;
+		this.listener		= listener;
 	}
 
+	// Este metodo es llamado por el RecyclerView para mostrar los datos del elemento de esa posición.
 	@Override
-	public void onBindViewHolder(MyViewHolder holder, int position) {
-		Contacto c 	= contactsList.get(position);
+	public void onBindViewHolder(MiViewHolder holder, int posicion) {
+		Contacto c 	= contactsList.get(posicion);
 		holder.nombreTV.setText(c.getNombre());
 		holder.fechaNacimientoTV.setText(df.format(c.getFechaNacimiento()));
+		holder.itemView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				listener.onItemClick(c);
+			}
+		});
 	}
 
 	@Override
@@ -45,10 +64,11 @@ public class ContactoAdapter extends RecyclerView.Adapter<ContactoAdapter.MyView
 		return contactsList.size();
 	}
 
+	// A este metodo se le llama cuando necesitamos crear una nueva linea para el RecyclerView.
 	@Override
-	public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+	public MiViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 		View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.linea,parent, false);
-		return new MyViewHolder(v);
+		return new MiViewHolder(v);
 	}
 
 }
